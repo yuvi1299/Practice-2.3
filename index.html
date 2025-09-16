@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SVG Drawing Tool</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+  }
+  #container {
+    border: 1px solid #666;
+    display: inline-block;
+    margin-top: 10px;
+  }
+  svg {
+    background: #f9f9f9;
+    cursor: crosshair;
+  }
+  h2 {
+    margin-bottom: 5px;
+  }
+</style>
+</head>
+<body>
+
+<h2><strong>SVG Drawing Tool</strong></h2>
+<div id="container">
+  <svg id="drawingArea" width="600" height="400"></svg>
+</div>
+
+<script>
+  const svg = document.getElementById('drawingArea');
+
+  let isDrawing = false;
+  let rect = null;
+  let startX = 0;
+  let startY = 0;
+
+  function getMousePosition(evt) {
+    const CTM = svg.getScreenCTM();
+    return {
+      x: (evt.clientX - CTM.e) / CTM.a,
+      y: (evt.clientY - CTM.f) / CTM.d
+    };
+  }
+
+  svg.addEventListener('mousedown', (evt) => {
+    isDrawing = true;
+    const pos = getMousePosition(evt);
+    startX = pos.x;
+    startY = pos.y;
+
+    rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('x', startX);
+    rect.setAttribute('y', startY);
+    rect.setAttribute('width', 0);
+    rect.setAttribute('height', 0);
+    rect.setAttribute('stroke', 'blue');
+    rect.setAttribute('stroke-width', 2);
+    rect.setAttribute('fill', 'rgba(0, 120, 215, 0.3)');
+    svg.appendChild(rect);
+  });
+
+  svg.addEventListener('mousemove', (evt) => {
+    if (!isDrawing) return;
+    const pos = getMousePosition(evt);
+
+    const width = Math.abs(pos.x - startX);
+    const height = Math.abs(pos.y - startY);
+    const rectX = Math.min(pos.x, startX);
+    const rectY = Math.min(pos.y, startY);
+
+    rect.setAttribute('x', rectX);
+    rect.setAttribute('y', rectY);
+    rect.setAttribute('width', width);
+    rect.setAttribute('height', height);
+  });
+
+  svg.addEventListener('mouseup', () => {
+    if (isDrawing) {
+      isDrawing = false;
+      rect = null;
+    }
+  });
+
+  svg.addEventListener('mouseleave', () => {
+    // Stop drawing if mouse leaves the SVG area
+    if (isDrawing) {
+      isDrawing = false;
+      rect = null;
+    }
+  });
+</script>
+
+</body>
+</html>
